@@ -1,7 +1,11 @@
 import express from "express";
-
+import connectDB from "./config/dbConfig.js";
+import userRoutes from "./routes/users.js";
 const app = express();
 
+connectDB();
+app.use(express.json());
+app.use("/", userRoutes);
 app.get("/", (req, res) => {
   console.log("Hello, world!");
   res.send("Hello, world!");
