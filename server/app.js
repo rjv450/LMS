@@ -5,7 +5,7 @@ const app = express();
 
 connectDB();
 app.use(express.json());
-app.use("/", userRoutes);
+app.use("/users", userRoutes);
 app.get("/", (req, res) => {
   console.log("Hello, world!");
   res.send("Hello, world!");
