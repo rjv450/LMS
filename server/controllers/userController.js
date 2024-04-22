@@ -99,3 +99,28 @@ export const refreshToken = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+async function getUsers(pageNumber, pageSize) {
+  const skip = (pageNumber - 1) * pageSize;
+  const users = await User.find({ status: "active" })
+    .skip(skip)
+    .limit(pageSize);
+  // .populate("courses");
+  return users;
+}
+export const getUsersList = async (req, res) => {
+  try {
+    const pageNumber = req.query.pageNumber || 1;
+    const pageSize = req.query.pageSize || 5;
+    const users = await getUsers(pageNumber, pageSize);
+
+    const hasNext = users.length === pageSize;
+
+    const hasPrevious = pageNumber > 1;
+
+    res.json({ users, hasNext, hasPrevious });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
