@@ -1,5 +1,19 @@
 import { body, validationResult } from "express-validator";
-
+export const validateUpdateUser = [
+  body("name").notEmpty().withMessage("Name is required"),
+  body("email").isEmail().withMessage("Invalid email format"),
+  body("user_type")
+    .optional()
+    .isIn(["admin", "user"])
+    .withMessage('User type must be either "admin" or "user"'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+];
 export const validateUser = [
   body("name").notEmpty().withMessage("Name is required"),
   body("email").isEmail().withMessage("Invalid email format"),

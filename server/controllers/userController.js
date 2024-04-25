@@ -124,3 +124,75 @@ export const getUsersList = async (req, res) => {
   }
 };
 
+export const updateUser = async (req, res) => {
+  try {
+    const { id: userId } = req.params;
+    const { name, email, user_type } = req.body;
+
+    const existingUser = await User.findOne({ _id: userId, status: "active" });
+    if (!existingUser) {
+      res.status(401).json({ message: "user not found" });
+    }
+
+    const userWithSameEmail = await User.findOne({
+      email,
+      _id: { $ne: userId },
+      status: "active",
+    });
+    if (userWithSameEmail) {
+      throw new Error("User with this email already exists.");
+    }
+    existingUser.name = name;
+    existingUser.email = email;
+    existingUser.user_type = user_type;
+    await existingUser.save();
+
+    res.status(200).json({ message: "User updated successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message || "Internal Server Error" });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const { id: userId } = req.params;
+    const user = await User.findOne({ _id: userId, status: "active" });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (req.body.permanentDelete || req.body.permanentDelete === 1) {
+      user.status = "inactive";
+      await user.save();
+      return res.status(200).json({ message: "User archived successfully" });
+    } else {
+      return res
+        .status(200)
+        .json({ message: "Are you sure you want to delete?" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getUserById = async (req, res) => {
+  try {
+    const { id: userId } = req.params;
+
+    const user = await User.findOne({
+      _id: userId,
+      status: "active",
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
